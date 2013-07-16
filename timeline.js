@@ -17,13 +17,24 @@ getDataset = function(){
     // console.log(ds.columnNames());
     // console.log("Date data: " + ds.column("Date").data )
     json.date=(ds.column("Date").data);
+    console.log(ds.column("Time").data[6])
+  	
     $.each(json.date,function(i,val){
-    	
+    	    	    		
     	json.date[i] =  new Date(val);
+
+    	if (ds.column("Time").data[i]!=null){
+    		var ti = parseTime(ds.column("Time").data[i])
+    		json.date[i].setHours(ti[0]);
+    		json.date[i].setMinutes(ti[1]);
+    	}
     })
+    // console.log(json.date)
+    
+
     // console.log(json.date);
-    json.title=ds.column(ds.columnNames()[1]).data;
-    json.content=ds.column(ds.columnNames()[2]).data
+    json.title=ds.column("Title").data;
+    json.content=ds.column("Text").data;
     // console.log(json.date.data);
     // console.log(json.title.data);
     // console.log(json);
@@ -32,14 +43,18 @@ getDataset = function(){
     
 	},
 	error : function() {
-		log("Are you sure you are connected to the internet?");
+		console.log("Are you sure you are connected to the internet?");
 	}
 	});
 
 
 }
 
-
+function parseTime(t){
+	//returns Date() object with time t
+	//takes time hh:mm:s
+	return t.split(":");
+}
 	//Read JSON file and store in variable "json";
 
 	// var json = (function () {
@@ -117,7 +132,19 @@ getDataset = function(){
 	// 	});
 		 
 	// }
-
+	function getTime(d){
+		// console.log((d.getHours()==0&&d.getMinutes()==0&&d.getSeconds()==0))
+		// var out;
+		// if (d.getHours()==0&&d.getMinutes()==0&&d.getSeconds()==0){
+		// 	out = "";
+		// }
+		// else {
+		// 	out = d.getHours()+" "+d.getMinutes();
+		// }
+		var out = (d.getHours()==0&&d.getMinutes()==0&&d.getSeconds()==0)?"":(d.getHours()+":"+(d.getMinutes()<10?'0':'') + d.getMinutes());
+		// console.log(out)
+		return out;
+	}
 	function populateDivs(){
 	//Go through file, populate divs. 	
 	// console.log(json)
@@ -139,13 +166,15 @@ getDataset = function(){
 		$("#content").append(
 			$("<div>").attr({"class":"timeline-item","id":"timeline-item-"+i})
 			//create new date div, populate	
-			.append($("<a>").attr({"class":"timeline-item-date","id":"timeline-item-date-"+i, "name":"#timeline-item-"+i}).text(month[d.getMonth()]+ " " + d.getDate() + ", " + d.getFullYear()))
+			.append($("<a>").attr({"class":"timeline-item-date","id":"timeline-item-date-"+i, "name":"#timeline-item-"+i}).text(month[d.getMonth()]+ " " + d.getDate() + ", " + d.getFullYear() + " " + getTime(d)))
 			//create new time div, populate
 			// .append($("<div>").attr({"class":"timeline-item-time","id":"timeline-item-time-"+i}).text(val.time))			
 			//add title
-			.append($("<div>").attr({"class":"timeline-item-title","id":"timeline-item-title-"+i}).text(json.title[i]))
+			.append($("<div>").attr({"class":"timeline-item-story-container","id":"timeline-item-story-container-"+i})
+				.append($("<div>").attr({"class":"timeline-item-title","id":"timeline-item-title-"+i}).text(json.title[i]))
 			//create new story div, populate
-			.append($("<div>").attr({"class":"timeline-item-story","id":"timeline-item-story-"+i}).text(json.content[i]))
+				.append($("<div>").attr({"class":"timeline-item-story","id":"timeline-item-story-"+i}).text(json.content[i]))
+			)
 			);		
 	});
 }; //End load JSON into divs
@@ -206,10 +235,10 @@ function drawTimeline(){
 				"class":"timeline-label",
 				"id":"timeline-label-" +i
 			})
-				.text(month[dates[i].getMonth()]+ " " + dates[i].getDate() + ", " + dates[i].getFullYear())//Display the date on mouseover								
+				.text(month[dates[i].getMonth()]+ " " + dates[i].getDate() + ", " + dates[i].getFullYear() + " " + getTime(dates[i]))//Display the date on mouseover								
 				.css({"visibility":"hidden","position":"absolute", "left":dateCoords[i]*100 + "%"})
 				)
-	console.log($("#timeline-event-dot-"+i).offsetParent().width())
+	// console.log($("#timeline-event-dot-"+i).offsetParent().width())
 	});
 };//End Draw timeline;
 

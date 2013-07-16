@@ -1,7 +1,7 @@
 @import url(http://fonts.googleapis.com/css?family=Open+Sans:400,700);
 @import url(http://fonts.googleapis.com/css?family=Bitter:400,700);
 html{	
-	font-family: 'Bitter', serif;
+	font-family: 'Open Sans', serif;
 }
 body{
 	width: 85%;
@@ -18,18 +18,26 @@ h1{
 #timeline-container{
 	padding:30px;
 	border-top: 2px solid;	
-	position:absolute;
-	width:85%;	
+	/*position:absolute;*/
+	width:930px;
+	margin:auto;	
 }
+
 .timeline-item{
-	padding:200px;
+	
+	padding:10px;
+	padding-top:20px;
+	margin:auto;
+	width:100%;
+	border-bottom: solid 2px;
+	display: inline-block;
 }
 #line{
 	display:block;
 	position:fixed;
 	background:rgba(7, 7, 7, 0.7);
 	bottom:0px;	
-	width:85%;
+	width:930px;
 	height:50px;
 	margin:auto;
 	padding:5px;
@@ -98,34 +106,35 @@ ul.timeline{
 	padding-left: 18px;
 	padding-right: 20px;
 	top:25px;
-
-	border-top: 3px solid #AAA;	
-
-	
+	border-top: 3px solid #AAA;
 }
 
 .timeline-item-date{
 	font-weight: 700;
 	float:left;
 	display:block;
-	width:150px;
-	left:-200px;
+	width:190px;
 	position: relative;
 }
-.timeline-item-story{
-	/*float:right;*/
+.timeline-item-story-container{
+	float:right;
+	width:715px;
 	display: block;
-	position: absolute;
+	/*position: absolute;*/
 	position: relative;
 	/*text-align: center;*/
 	display: block;
 	padding:2px;
+
+
+}
+.timeline-item-story{
+	font-family: 'Bitter', serif;
+
 }
 .timeline-item-title{
 	font-weight: 700;
-	left: -148px;
 	position: relative;
-
 }
 
 footer{
