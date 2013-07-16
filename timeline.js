@@ -1,19 +1,63 @@
 $(function(){ //when the document is ready... 
 
+	var dfd = $.Deferred();
+	var json = new Array();
+//Get dataset
+var ds = new Miso.Dataset({
+	importer : Miso.Dataset.Importers.GoogleSpreadsheet,
+	parser : Miso.Dataset.Parsers.GoogleSpreadsheet,
+	key : "0Ag-BlnbZq4DXdFZ0c1huYlJ1U1NQSzR2U1NMR1RkdGc",
+	worksheet : "1"
+});
+
+getDataset = function(){
+	
+	ds.fetch({ 
+	success : function() {
+    // console.log(ds.columnNames());
+    // console.log("Date data: " + ds.column("Date").data )
+    json.date=(ds.column("Date").data);
+    $.each(json.date,function(i,val){
+    	
+    	json.date[i] =  new Date(val);
+    })
+    // console.log(json.date);
+    json.title=ds.column(ds.columnNames()[1]).data;
+    json.content=ds.column(ds.columnNames()[2]).data
+    // console.log(json.date.data);
+    // console.log(json.title.data);
+    // console.log(json);
+    
+    dfd.resolve();
+    
+	},
+	error : function() {
+		log("Are you sure you are connected to the internet?");
+	}
+	});
+
+
+}
+
+
 	//Read JSON file and store in variable "json";
-	var json = (function () {
-		var json = null;
-		$.ajax({
-			'async': false,
-			'global': false,
-			'url': "timelinedata.json",
-			'dataType': "json",
-			'success': function (data) {
-				json = data;
-			}
-		});
-		return json;
-	})();
+
+	// var json = (function () {
+	// 	var json = null;
+	// 	$.ajax({
+	// 		// 'async': false,
+	// 		'global': false,
+	// 		// 'url': "timelinedata.json",
+	// 		'url':"https://spreadsheets.google.com/feeds/list/0Ag-BlnbZq4DXdGN3aE5SZmFXY1ZadVhmbV8wTEFVUXc/od6/public/full?alt=json-in-script",
+	// 		// 'url':"http://spreadsheets.google.com/feeds/cells/0AonYZs4MzlZbcGhOdG0zTG1EWkVNZ3BKMVNaZXkwUmc/0/public/basic?alt=json-in-script",
+	// 		'dataType': "json",
+	// 		'success': function (data) {
+	// 			json = data;
+				
+	// 		}
+	// 	});
+	// 	return json;
+	// })();
 	
 
 	//find the relative position of a date 
@@ -61,22 +105,34 @@ $(function(){ //when the document is ready...
 		return true;
 	}
 
-	function sortInput(){
-		//Sort input in ascending date order
-		json = json.sort(function(a, b) {
-			a = new Date(a.date);
-			b = new Date(b.date);
-			return a>b ? 1 : a<b ? -1 : 0;
-		});
-
-	}
+	// function sortInput(){
+	// 	//Sort input in ascending date order
+	// 	json = json.sort(function(a, b) {
+	// 		// x = new Date();		
+	// 		// x = a.date;	
+	// 		// y = new Date();
+	// 		// y = b.date;
+	// 		return a.date>b.date ? 1 : a.date<b.date ? -1 : 0;
+	// 		console.log((a.date>b.date));
+	// 	});
+		 
+	// }
 
 	function populateDivs(){
 	//Go through file, populate divs. 	
-	$.each(json, function(i,val){
+	// console.log(json)
+	// console.log(json.date);
+	$.each(json,function(i,val){
 
-		var d = new Date(val.date);
+	});
+
+	$.each(json.date, function(i,val){
+
+		var d = new Date();
+		d=val;
+		// console.log(d);
 		dates[i]=d;
+		
 		//order by date
 
 		//create new timeline item
@@ -87,14 +143,15 @@ $(function(){ //when the document is ready...
 			//create new time div, populate
 			// .append($("<div>").attr({"class":"timeline-item-time","id":"timeline-item-time-"+i}).text(val.time))			
 			//add title
-			.append($("<div>").attr({"class":"timeline-item-title","id":"timeline-item-title-"+i}).text(val.title))
+			.append($("<div>").attr({"class":"timeline-item-title","id":"timeline-item-title-"+i}).text(json.title[i]))
 			//create new story div, populate
-			.append($("<div>").attr({"class":"timeline-item-story","id":"timeline-item-story-"+i}).text(val.content))
+			.append($("<div>").attr({"class":"timeline-item-story","id":"timeline-item-story-"+i}).text(json.content[i]))
 			);		
 	});
 }; //End load JSON into divs
 function getCoords(){	
 	//Find the coordinates for each date;
+	// console.log(dates)
 	$.each(dates,function(i,val){
 		dateCoords[i]=coord(Math.min.apply(Math,dates), Math.max.apply(Math,dates), val);	
 	});
@@ -149,9 +206,10 @@ function drawTimeline(){
 				"class":"timeline-label",
 				"id":"timeline-label-" +i
 			})
-				.text(month[dates[i].getMonth()]+ " " + dates[i].getDate() + ", " + dates[i].getFullYear())//Display the date on mouseover
-				.css({"visibility":"hidden","position":"absolute", "left":100*$("#timeline-event-dot-"+i).position().left/$("#timeline-event-dot-"+i).offsetParent().width() + "%"})
+				.text(month[dates[i].getMonth()]+ " " + dates[i].getDate() + ", " + dates[i].getFullYear())//Display the date on mouseover								
+				.css({"visibility":"hidden","position":"absolute", "left":dateCoords[i]*100 + "%"})
 				)
+	console.log($("#timeline-event-dot-"+i).offsetParent().width())
 	});
 };//End Draw timeline;
 
@@ -163,13 +221,13 @@ function currentView(){
 	$(".timeline-item").each(function(i){
 		scrollVals[i] = Math.floor($("#timeline-item-"+i).offset().top);
 	});
-	
+	// console.log(scrollVals);
 	//if scroll is below a certain item, make that one active
-	var barPos = Math.floor($('body').scrollTop());
-
+	var barPos = Math.floor($(document).scrollTop());	
 	$.each(scrollVals,function(i,val){
 		if ((i+1)<(scrollVals.length)){
 			if ((barPos>=(scrollVals[i]-5))&&(barPos<(scrollVals[i+1]-5))){ //5 is a safety value for when it scrolls
+				// console.log("HERE")
 				$("#timeline-event-dot-"+i).addClass("timeline-event-dot-selected");
 				$("#timeline-event-dot-"+i).css("z-index","10");
 				$("#timeline-label-"+i).css("visibility","visible");
@@ -211,35 +269,48 @@ function resizeTimeline(){
 
 function drawFirstLastLabels(){
 	//get the first label
-	var first;
+	var first = 0;
 	//get the last label
-	var last;
+	var last = (json.date.length)-1;
 
-	$(".timeline-event-dot").each(function(i){
-		// console.log($(this).position().left);
-		// console.log($("#line").width())
-		if($(this).position().left==0){//first
-			first = i;
-		}
-		else if($(this).position().left>=$("#line").width()){//last
-			last = i;
-		}
-	});
-	var output =$("#timeline-event-dot-"+last).position().left/$("#timeline-event-dot-"+last).offsetParent().width();
-	console.log(output);
+	// $(".timeline-event-dot").each(function(i){
+	// 	// console.log($(this).position().left);
+	// 	// console.log($("#line").width())
+	// 	if($(this).position().left==0){//first
+	// 		first = i;
+
+	// 	}
+	// 	else if($(this).position().left>=$("#line").width()){//last
+	// 		last = i;
+	// 		console.log("last " + last);
+	// 	}
+	// });
+	// var output =$("#timeline-event-dot-"+last).position().left/$("#timeline-event-dot-"+last).offsetParent().width();
+	// console.log(output);
 	//Draw first 
 	$("#first-timeline-label").text(month[dates[first].getMonth()]+ " " + dates[first].getDate() + ", " + dates[first].getFullYear())//Display the date on mouseover
-	.css({"position":"absolute", "left":100*$("#timeline-event-dot-"+first).position().left/$("#timeline-event-dot-"+first).offsetParent().width() + "%"});
+	.css({"position":"absolute", "left":100*dateCoords[first] + "%"});
 	$("#last-timeline-label").text(month[dates[last].getMonth()]+ " " + dates[last].getDate() + ", " + dates[last].getFullYear())//Display the date on mouseover
-	.css({"position":"absolute", "left":100*$("#timeline-event-dot-"+last).position().left/$("#timeline-event-dot-"+last).offsetParent().width() + "%"})
+	.css({"position":"absolute", "left":100*dateCoords[last] + "%"})
 
 }
-sortInput(); //sort the input by date order
-populateDivs(); //write that to the page
-getCoords(); //prepare the timeline
-drawTimeline(); //draw it
-drawFirstLastLabels(); //draw the labels
+
+
+getDataset(); //assume sorted
+dfd.done(function(){$(window).scroll(function(){currentView();})},
+	function(){$(window).resize(function(){resizeTimeline();})},
+	populateDivs,
+	getCoords,
+	drawTimeline,
+	drawFirstLastLabels);
+
+
+// sortInput(); //sort the input by date order
+	// populateDivs(); //write that to the page
+// getCoords(); //prepare the timeline
+// drawTimeline(); //draw it
+// drawFirstLastLabels(); //draw the labels
 //when stuff happens on the page, change stuff. 
-$(window).resize(function(){resizeTimeline();});
-$(window).scroll(function(){currentView();});
+// $(window).resize(function(){resizeTimeline();});
+// $(window).scroll(function(){currentView();});
 });
