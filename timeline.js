@@ -14,13 +14,15 @@ $(function(){ //when the document is ready...
 		});
 		return json;
 	})();
-	console.log(json);
+	
+
 	//find the relative position of a date 
 	var coord = (function(firstDate, lastDate, point){
 		range = lastDate-firstDate;
 		return ((point-firstDate)/range);
 	});
 	
+
 
 	//Global Vars
 	var dates = new Array();
@@ -59,11 +61,24 @@ $(function(){ //when the document is ready...
 		return true;
 	}
 
+	function sortInput(){
+		//Sort input in ascending date order
+		json = json.sort(function(a, b) {
+			a = new Date(a.date);
+			b = new Date(b.date);
+			return a>b ? 1 : a<b ? -1 : 0;
+		});
+
+	}
+
 	function populateDivs(){
-	//Go through file, populate divs. Assume they are in date order.
+	//Go through file, populate divs. 	
 	$.each(json, function(i,val){
+
 		var d = new Date(val.date);
 		dates[i]=d;
+		//order by date
+
 		//create new timeline item
 		$("#content").append(
 			$("<div>").attr({"class":"timeline-item","id":"timeline-item-"+i})
@@ -75,10 +90,7 @@ $(function(){ //when the document is ready...
 			.append($("<div>").attr({"class":"timeline-item-title","id":"timeline-item-title-"+i}).text(val.title))
 			//create new story div, populate
 			.append($("<div>").attr({"class":"timeline-item-story","id":"timeline-item-story-"+i}).text(val.content))
-			);
-		//create timeline-line, populate
-		
-
+			);		
 	});
 }; //End load JSON into divs
 function getCoords(){	
@@ -97,24 +109,38 @@ function drawTimeline(){
 			})			
 			.css({"position":"absolute", "left":(val*100)+"%"})
 			// .css({"position":"absolute", "left":(val*$("#line").width()+"px")})			
-			.click(function(){		
+			.click(function(){//scroll to appropriate part of the page when click
 				$('html, body').animate({
 					scrollTop: (Math.floor($("#timeline-item-"+i).offset().top))
 				}, 1000);
 				$("#timeline-item-label-"+i).addClass("timeline-event-dot-selected");
 			})
 			.mouseover(function(){
-				$(this).addClass("timeline-event-dot-active");								
-				$("#timeline-label-"+i).css("visibility","visible")
+				$(this).addClass("timeline-event-dot-active");		
+				//Hide all other labels;
+				$(".timeline-label").each(function(i){					
+					if (!($(this).attr('id')=="first-timeline-label" || $(this).attr('id')=="last-timeline-label"|| $(this).attr('id')=="timeline-labels")){
+						$(this).css("visibility","hidden");
+					}
+				});	
+				
+				//Show the mouseover label	
+				
+				$("#timeline-label-"+i).css("visibility","visible");
 			})
 			.mouseleave(function(){
 				//deactivate and hide label
 				$(this).removeClass("timeline-event-dot-active");
 				if (!$("#timeline-event-dot-"+i).hasClass("timeline-event-dot-selected")){
 					$("#timeline-label-"+i).css("visibility","hidden");
-					// console.log("here")
 				}
-				
+
+				//show selected label
+				$(".timeline-event-dot").each(function(i){
+					if ($("#timeline-event-dot-"+i).hasClass("timeline-event-dot-selected")){
+						$("#timeline-label-"+i).css("visibility","visible");
+					}
+				})				
 			})
 			);
 		//draw all timeline labels, set as hidden. 
@@ -140,17 +166,18 @@ function currentView(){
 	
 	//if scroll is below a certain item, make that one active
 	var barPos = Math.floor($('body').scrollTop());
-	// console.log(barPos)
 
 	$.each(scrollVals,function(i,val){
 		if ((i+1)<(scrollVals.length)){
 			if ((barPos>=(scrollVals[i]-5))&&(barPos<(scrollVals[i+1]-5))){ //5 is a safety value for when it scrolls
 				$("#timeline-event-dot-"+i).addClass("timeline-event-dot-selected");
+				$("#timeline-event-dot-"+i).css("z-index","10");
 				$("#timeline-label-"+i).css("visibility","visible");
 			}
 			else
 			{
 				$("#timeline-event-dot-"+i).removeClass("timeline-event-dot-selected");
+				$("#timeline-event-dot-"+i).css("z-index","1");
 				$("#timeline-label-"+i).css("visibility","hidden");
 			}
 		}
@@ -158,11 +185,13 @@ function currentView(){
 		else{
 			if (barPos>=(scrollVals[i]-5)){
 				$("#timeline-event-dot-"+i).addClass("timeline-event-dot-selected");
+				$("#timeline-event-dot-"+i).css("z-index","10");
 				$("#timeline-label-"+i).css("visibility","visible");	
 			}
 			else
 			{
 				$("#timeline-event-dot-"+i).removeClass("timeline-event-dot-selected");	
+				$("#timeline-event-dot-"+i).css("z-index","1");
 				$("#timeline-label-"+i).css("visibility","hidden");
 			}
 		} 
@@ -205,11 +234,12 @@ function drawFirstLastLabels(){
 	.css({"position":"absolute", "left":100*$("#timeline-event-dot-"+last).position().left/$("#timeline-event-dot-"+last).offsetParent().width() + "%"})
 
 }
-
-populateDivs();
-getCoords();
-drawTimeline();
-drawFirstLastLabels();
+sortInput(); //sort the input by date order
+populateDivs(); //write that to the page
+getCoords(); //prepare the timeline
+drawTimeline(); //draw it
+drawFirstLastLabels(); //draw the labels
+//when stuff happens on the page, change stuff. 
 $(window).resize(function(){resizeTimeline();});
 $(window).scroll(function(){currentView();});
 });
