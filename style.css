@@ -10,6 +10,27 @@ body{
 h1{
 	text-align: center;
 }
+.clearfix:after {
+	content: ".";
+	display: block;
+	clear: both;
+	visibility: hidden;
+	line-height: 0;
+	height: 0;
+}
+ 
+.clearfix {
+	display: inline-block;
+}
+ 
+html[xmlns] .clearfix {
+	display: block;
+}
+ 
+* html .clearfix {
+	height: 1%;
+}
+
 #top{
 	/*position:fixed;*/
 	width:100%;
@@ -172,6 +193,20 @@ ul.timeline{
 		margin:0px;
 		/*font-weight: 400;*/
 		font-size:12px;
+	}
+	.timeline-item-image{
+		display:block;
+		width:400px;
+		float:right;
+		margin-left:10px;
+	}
+	.timeline-item-image img{
+		width:400px;
+	}
+	.media-credit{
+		font-size: 10px;
+		color:#AAA;
+		text-align: center;
 	}
 	footer{
 		height:400px;

@@ -35,6 +35,8 @@ getDataset = function(){
     // console.log(json.date);
     json.title=ds.column("Title").data;
     json.content=ds.column("Text").data;
+    json.mediaURL=ds.column("MediaURL").data;
+    json.mediaCredit=ds.column("Media Credit").data;
     // console.log(json.date.data);
     // console.log(json.title.data);
     // console.log(json);
@@ -162,23 +164,33 @@ function parseTime(t){
 		// console.log(d);
 		dates[i]=d;
 		
-		//order by date
+
 
 		//create new timeline item
 		$("#content").append(
 			$("<div>").attr({"class":"timeline-item","id":"timeline-item-"+i})
 			//create new date div, populate	
-			.append($("<a>").attr({"class":"timeline-item-date","id":"timeline-item-date-"+i, "name":"#timeline-item-"+i}).text(month[d.getMonth()]+ " " + d.getDate() + ", " + d.getFullYear() + " " + getTime(d)))
+			.append($("<a>").attr({"class":"timeline-item-date","id":"timeline-item-date-"+i, "name":"#timeline-item-"+i}).html("<h3>"+month[d.getMonth()]+ " " + d.getDate() + ", " + d.getFullYear() + " " + getTime(d)+"</h3>"))
 			//create new time div, populate
 			// .append($("<div>").attr({"class":"timeline-item-time","id":"timeline-item-time-"+i}).text(val.time))			
 			//add title
+
 			.append($("<div>").attr({"class":"timeline-item-story-container","id":"timeline-item-story-container-"+i})
-				.append($("<div>").attr({"class":"timeline-item-title","id":"timeline-item-title-"+i}).text(json.title[i]))
+				// .append($("<div>").attr({"class":"timeline-item-title","id":"timeline-item-title-"+i}).html("<h3>"+json.title[i]+"</h3>"))
 			//create new story div, populate
-			.append($("<div>").attr({"class":"timeline-item-story","id":"timeline-item-story-"+i}).text(json.content[i]))
+			.append($("<div>").attr({"class":"timeline-item-story","id":"timeline-item-story-"+i}).html("<h3>"+json.title[i]+"</h3>"+"<p>"+json.content[i]+"</p>"))
 			)
-			);		
-	});
+			)	
+			//Add media if it exists
+			
+			if (json.mediaURL[i]!=null){
+				// console.log(json.mediaURL[i])	
+				$("#timeline-item-story-container-"+i).prepend($("<div>").attr({"class":"timeline-item-image","id":"timeline-item-image-"+i}).html("<img src="+json.mediaURL[i]+">"))
+			}
+			if (json.mediaCredit[i]!=null){
+				$("#timeline-item-image-"+i).append($("<p class='media-credit'>").text(json.mediaCredit[i]))
+			}			
+		});
 }; //End load JSON into divs
 function getCoords(){	
 	//Find the coordinates for each date;
