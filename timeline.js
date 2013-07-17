@@ -13,14 +13,14 @@ var ds = new Miso.Dataset({
 getDataset = function(){
 	
 	ds.fetch({ 
-	success : function() {
+		success : function() {
     // console.log(ds.columnNames());
     // console.log("Date data: " + ds.column("Date").data )
     json.date=(ds.column("Date").data);
     console.log(ds.column("Time").data[6])
-  	
+
     $.each(json.date,function(i,val){
-    	    	    		
+
     	json.date[i] =  new Date(val);
 
     	if (ds.column("Time").data[i]!=null){
@@ -41,11 +41,11 @@ getDataset = function(){
     
     dfd.resolve();
     
-	},
-	error : function() {
-		console.log("Are you sure you are connected to the internet?");
-	}
-	});
+},
+error : function() {
+	console.log("Are you sure you are connected to the internet?");
+}
+});
 
 
 }
@@ -68,12 +68,12 @@ function parseTime(t){
 	// 		'dataType': "json",
 	// 		'success': function (data) {
 	// 			json = data;
-				
+
 	// 		}
 	// 	});
 	// 	return json;
 	// })();
-	
+
 
 	//find the relative position of a date 
 	var coord = (function(firstDate, lastDate, point){
@@ -86,6 +86,8 @@ function parseTime(t){
 	//Global Vars
 	var dates = new Array();
 	var dateCoords=new Array();
+	var scrollVals = new Array();
+	var curPos = 0;		
 
 	var month=new Array();
 	month[0]="Jan.";
@@ -130,7 +132,7 @@ function parseTime(t){
 	// 		return a.date>b.date ? 1 : a.date<b.date ? -1 : 0;
 	// 		console.log((a.date>b.date));
 	// 	});
-		 
+
 	// }
 	function getTime(d){
 		// console.log((d.getHours()==0&&d.getMinutes()==0&&d.getSeconds()==0))
@@ -173,7 +175,7 @@ function parseTime(t){
 			.append($("<div>").attr({"class":"timeline-item-story-container","id":"timeline-item-story-container-"+i})
 				.append($("<div>").attr({"class":"timeline-item-title","id":"timeline-item-title-"+i}).text(json.title[i]))
 			//create new story div, populate
-				.append($("<div>").attr({"class":"timeline-item-story","id":"timeline-item-story-"+i}).text(json.content[i]))
+			.append($("<div>").attr({"class":"timeline-item-story","id":"timeline-item-story-"+i}).text(json.content[i]))
 			)
 			);		
 	});
@@ -229,6 +231,25 @@ function drawTimeline(){
 				})				
 			})
 			);
+
+		//Attach previous and next functionality
+		$("#back-button").unbind('click').click(function(){
+			
+			if (curPos>0){
+				$('html,body').animate({
+					scrollTop: (Math.floor($("#timeline-item-"+(curPos - 1)).offset().top))
+				}, 1000)
+			}
+		});
+		$("#forward-button").unbind('click').click(function(){			
+			if (curPos<$(".timeline-event-dot").length-1){
+				$('html,body').animate({
+					scrollTop: (Math.floor($("#timeline-item-"+(curPos + 1)).offset().top))
+				}, 1000)
+			}
+			
+		});
+
 		//draw all timeline labels, set as hidden. 
 		$("#timeline-labels").append(
 			$("<li>").attr({
@@ -239,14 +260,14 @@ function drawTimeline(){
 				.css({"visibility":"hidden","position":"absolute", "left":dateCoords[i]*100 + "%"})
 				)
 	// console.log($("#timeline-event-dot-"+i).offsetParent().width())
-	});
+});
 };//End Draw timeline;
 
 
 
 function currentView(){
 	//Sets the currently viewed item as active
-	var scrollVals = new Array();
+	
 	$(".timeline-item").each(function(i){
 		scrollVals[i] = Math.floor($("#timeline-item-"+i).offset().top);
 	});
@@ -257,6 +278,7 @@ function currentView(){
 		if ((i+1)<(scrollVals.length)){
 			if ((barPos>=(scrollVals[i]-5))&&(barPos<(scrollVals[i+1]-5))){ //5 is a safety value for when it scrolls
 				// console.log("HERE")
+				curPos=i;			
 				$("#timeline-event-dot-"+i).addClass("timeline-event-dot-selected");
 				$("#timeline-event-dot-"+i).css("z-index","10");
 				$("#timeline-label-"+i).css("visibility","visible");
@@ -271,6 +293,7 @@ function currentView(){
 		//last one
 		else{
 			if (barPos>=(scrollVals[i]-5)){
+				curPos=i;
 				$("#timeline-event-dot-"+i).addClass("timeline-event-dot-selected");
 				$("#timeline-event-dot-"+i).css("z-index","10");
 				$("#timeline-label-"+i).css("visibility","visible");	

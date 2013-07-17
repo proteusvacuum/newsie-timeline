@@ -40,7 +40,8 @@ h1{
 	width:930px;
 	height:50px;
 	margin:auto;
-	padding:5px;
+	padding:15px;
+	padding-left: 30px;
 	border-radius: 5px;
 	z-index: 100;
 }
@@ -96,47 +97,82 @@ ul.timeline{
 	margin:auto;
 	bottom:15px;
 
-}*/
-#line-bg{
+	}*/
+	#line-bg{
 		width:80%;
-	display:block;
-	position: relative;
-	margin-left: auto;
-	margin-right: auto;
-	padding-left: 18px;
-	padding-right: 20px;
-	top:25px;
-	border-top: 3px solid #AAA;
-}
+		display:block;
+		position: relative;
+		margin-left: auto;
+		margin-right: auto;
+		padding-left: 18px;
+		padding-right: 20px;
+		top:25px;
+		border-top: 3px solid #AAA;
+	}
 
-.timeline-item-date{
-	font-weight: 700;
-	float:left;
-	display:block;
-	width:190px;
-	position: relative;
-}
-.timeline-item-story-container{
-	float:right;
-	width:715px;
-	display: block;
-	/*position: absolute;*/
-	position: relative;
-	/*text-align: center;*/
-	display: block;
-	padding:2px;
+	.timeline-item-date{
+		font-weight: 700;
+		float:left;
+		display:block;
+		width:190px;
+		position: relative;
+	}
+	.timeline-item-story-container{
+		float:right;
+		width:715px;
+		display: block;
+		/*position: absolute;*/
+		position: relative;
+		/*text-align: center;*/
+		display: block;
+		padding:2px;
 
 
-}
-.timeline-item-story{
-	font-family: 'Bitter', serif;
+	}
+	.timeline-item-story{
+		font-family: 'Bitter', serif;
 
-}
-.timeline-item-title{
-	font-weight: 700;
-	position: relative;
-}
-
-footer{
-	height:400px;
-}
+	}
+	.timeline-item-title{
+		font-weight: 700;
+		position: relative;
+	}
+	#button-container{
+		/*width:80%;*/
+		display:block;
+		position: absolute;
+		margin-left: auto;
+		margin-right: auto;
+		padding-left: 18px;
+		padding-right: 20px;
+		top:10px;	
+		left: -6px;
+	}
+	#back-button, #forward-button{
+		border: 1px solid #999;
+		cursor: pointer;
+		padding:6px 4px;
+		color:white;
+		margin-bottom:2px;
+		/*margin:6px;*/
+	}
+	#back-button h4{
+		background: url("arrow-left.gif") no-repeat scroll 100% 50% transparent;
+		/*width: 26px;*/
+		text-align: right;
+		padding-right: 12px;
+		margin:0px;
+		font-size:12px;
+	}
+	#forward-button h4{
+		background: url("arrow-right.gif") no-repeat scroll 100% 50% transparent;
+		/*width: 26px;*/
+		text-align: right;
+		padding-right: 12px;
+		margin:0px;
+		/*font-weight: 400;*/
+		font-size:12px;
+	}
+	footer{
+		height:400px;
+	}
