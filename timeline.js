@@ -1,109 +1,53 @@
-$(function(){ //when the document is ready... 
+// newsie-timeline.js
+// by Farid Rener: faridrener.com
+// A simple timeline plotter which takes data from a date-ordered google spreadsheet.
+// Spreadsheet should have the following column names:
+// Title | Text | MediaURL | Media Credit
 
-	var dfd = $.Deferred();
-	var json = new Array();
-//Get dataset
-var ds = new Miso.Dataset({
-	importer : Miso.Dataset.Importers.GoogleSpreadsheet,
-	parser : Miso.Dataset.Parsers.GoogleSpreadsheet,
-	key : "0Ag-BlnbZq4DXdFZ0c1huYlJ1U1NQSzR2U1NMR1RkdGc",
-	worksheet : "1"
-});
+	//Variables
+	var dfd = $.Deferred(); //JQuery Callback when Dataset is ready
+	var json = new Array(); //The data will go in here. 	
+	var dates = new Array(); //The dates
+	var dateCoords=new Array(); //Where the dates are plot on the timeline
+	var scrollVals = new Array(); //The position of each story div within the document
+	var curPos = 0;	//The current scrollbar position
 
-getDataset = function(){
-	
-	ds.fetch({ 
-		success : function() {
-    // console.log(ds.columnNames());
-    // console.log("Date data: " + ds.column("Date").data )
-    json.date=(ds.column("Date").data);
-    console.log(ds.column("Time").data[6])
+	var month=new Array(); //The names of the months. 
+		month[0]="Jan.";
+		month[1]="Feb.";
+		month[2]="Mar.";
+		month[3]="Apr.";
+		month[4]="May";
+		month[5]="June";
+		month[6]="July";
+		month[7]="Aug.";
+		month[8]="Sept.";
+		month[9]="Oct.";
+		month[10]="Nov.";
+		month[11]="Dec.";
 
-    $.each(json.date,function(i,val){
-
-    	json.date[i] =  new Date(val);
-
-    	if (ds.column("Time").data[i]!=null){
-    		var ti = parseTime(ds.column("Time").data[i])
-    		json.date[i].setHours(ti[0]);
-    		json.date[i].setMinutes(ti[1]);
-    	}
-    })
-    // console.log(json.date)
-    
-
-    // console.log(json.date);
-    json.title=ds.column("Title").data;
-    json.content=ds.column("Text").data;
-    json.mediaURL=ds.column("MediaURL").data;
-    json.mediaCredit=ds.column("Media Credit").data;
-    // console.log(json.date.data);
-    // console.log(json.title.data);
-    // console.log(json);
-    
-    dfd.resolve();
-    
-},
-error : function() {
-	console.log("Are you sure you are connected to the internet?");
-}
-});
+	//------------------
+	//Helper functions:
+	//-------------------
+	function parseTime(t){ 
+		//returns an array of hours, minutes and seconds, parsed from Google Spreadsheet Time format
+		//t input is in format "hh:mm:ss"
+		return t.split(":");
+	}//end parseTime
 
 
-}
-
-function parseTime(t){
-	//returns Date() object with time t
-	//takes time hh:mm:s
-	return t.split(":");
-}
-	//Read JSON file and store in variable "json";
-
-	// var json = (function () {
-	// 	var json = null;
-	// 	$.ajax({
-	// 		// 'async': false,
-	// 		'global': false,
-	// 		// 'url': "timelinedata.json",
-	// 		'url':"https://spreadsheets.google.com/feeds/list/0Ag-BlnbZq4DXdGN3aE5SZmFXY1ZadVhmbV8wTEFVUXc/od6/public/full?alt=json-in-script",
-	// 		// 'url':"http://spreadsheets.google.com/feeds/cells/0AonYZs4MzlZbcGhOdG0zTG1EWkVNZ3BKMVNaZXkwUmc/0/public/basic?alt=json-in-script",
-	// 		'dataType': "json",
-	// 		'success': function (data) {
-	// 			json = data;
-
-	// 		}
-	// 	});
-	// 	return json;
-	// })();
-
-
-	//find the relative position of a date 
-	var coord = (function(firstDate, lastDate, point){
+	var coord = (function(firstDate, lastDate, point){ 
+		//returns the relative position, from 0 to 1 of where the timeline dot should be plot
 		range = lastDate-firstDate;
 		return ((point-firstDate)/range);
 	});
-	
 
-
-	//Global Vars
-	var dates = new Array();
-	var dateCoords=new Array();
-	var scrollVals = new Array();
-	var curPos = 0;		
-
-	var month=new Array();
-	month[0]="Jan.";
-	month[1]="Feb.";
-	month[2]="Mar.";
-	month[3]="Apr.";
-	month[4]="May";
-	month[5]="June";
-	month[6]="July";
-	month[7]="Aug.";
-	month[8]="Sept.";
-	month[9]="Oct.";
-	month[10]="Nov.";
-	month[11]="Dec.";
+	function getCoords(){	
+		//Populate dateCoords[]; 
+		$.each(dates,function(i,val){
+			dateCoords[i]=coord(Math.min.apply(Math,dates), Math.max.apply(Math,dates), val);	
+		});
+	};
 
 	function collision($div1, $div2) {
 		//http://stackoverflow.com/a/5541252
@@ -124,257 +68,248 @@ function parseTime(t){
 		return true;
 	}
 
-	// function sortInput(){
-	// 	//Sort input in ascending date order
-	// 	json = json.sort(function(a, b) {
-	// 		// x = new Date();		
-	// 		// x = a.date;	
-	// 		// y = new Date();
-	// 		// y = b.date;
-	// 		return a.date>b.date ? 1 : a.date<b.date ? -1 : 0;
-	// 		console.log((a.date>b.date));
-	// 	});
-
-	// }
 	function getTime(d){
-		// console.log((d.getHours()==0&&d.getMinutes()==0&&d.getSeconds()==0))
-		// var out;
-		// if (d.getHours()==0&&d.getMinutes()==0&&d.getSeconds()==0){
-		// 	out = "";
-		// }
-		// else {
-		// 	out = d.getHours()+" "+d.getMinutes();
-		// }
+		//Tests if there is a time present for the data, returns the time if so. 
 		var out = (d.getHours()==0&&d.getMinutes()==0&&d.getSeconds()==0)?"":(d.getHours()+":"+(d.getMinutes()<10?'0':'') + d.getMinutes());
-		// console.log(out)
 		return out;
 	}
+
+	function calculateScrollVals(){
+		$(".newsie-timeline-item").each(function(i){
+			scrollVals[i] = Math.floor($("#newsie-timeline-item-"+i).offset().top);
+		});
+		// return scrollVals;
+	}
+
 	function populateDivs(){
-	//Go through file, populate divs. 	
-	// console.log(json)
-	// console.log(json.date);
-	$.each(json,function(i,val){
-
-	});
-
-	$.each(json.date, function(i,val){
-
-		var d = new Date();
-		d=val;
-		// console.log(d);
-		dates[i]=d;
-		
-
-
-		//create new timeline item
-		$("#content").append(
-			$("<div>").attr({"class":"timeline-item","id":"timeline-item-"+i})
-			//create new date div, populate	
-			.append($("<a>").attr({"class":"timeline-item-date","id":"timeline-item-date-"+i, "name":"#timeline-item-"+i}).html("<h3>"+month[d.getMonth()]+ " " + d.getDate() + ", " + d.getFullYear() + " " + getTime(d)+"</h3>"))
-			//create new time div, populate
-			// .append($("<div>").attr({"class":"timeline-item-time","id":"timeline-item-time-"+i}).text(val.time))			
+		//Draws the stories on the screen
+		$.each(json.date, function(i,val){
+			//for each item, create a new div with class=newsie-timeline-item, id=newsie-timeline-item-# 
+			//inlude images if it exists. 
+			var d = new Date();
+			d=val;
+			dates[i]=d;
+			//create new wrapper 
+			$("#newsie-content").append(
+			$("<div>").attr({"class":"newsie-timeline-item","id":"newsie-timeline-item-"+i})
+			//add the date and time
+			.append($("<a>").attr({"class":"newsie-timeline-item-date","id":"newsie-timeline-item-date-"+i, "name":"#newsie-timeline-item-"+i}).html("<h3>"+month[d.getMonth()]+ " " + d.getDate() + ", " + d.getFullYear() + " " + getTime(d)+"</h3>"))
 			//add title
-
-			.append($("<div>").attr({"class":"timeline-item-story-container","id":"timeline-item-story-container-"+i})
-				// .append($("<div>").attr({"class":"timeline-item-title","id":"timeline-item-title-"+i}).html("<h3>"+json.title[i]+"</h3>"))
-			//create new story div, populate
-			.append($("<div>").attr({"class":"timeline-item-story","id":"timeline-item-story-"+i}).html("<h3>"+json.title[i]+"</h3>"+"<p>"+json.content[i]+"</p>"))
-			)
+			.append($("<div>").attr({"class":"newsie-timeline-item-story-container","id":"newsie-timeline-item-story-container-"+i})
+			//add the text
+			.append($("<div>").attr({"class":"newsie-timeline-item-story","id":"newsie-timeline-item-story-"+i}).html("<h3>"+json.title[i]+"</h3>"+"<p>"+json.content[i]+"</p>"))
+				)
 			)	
-			//Add media if it exists
-			
+			//Add media if it exists			
 			if (json.mediaURL[i]!=null){
 				// console.log(json.mediaURL[i])	
-				$("#timeline-item-story-container-"+i).prepend($("<div>").attr({"class":"timeline-item-image","id":"timeline-item-image-"+i}).html("<img src="+json.mediaURL[i]+">"))
+				$("#newsie-timeline-item-story-container-"+i).prepend($("<div>").attr({"class":"newsie-timeline-item-image","id":"newsie-timeline-item-image-"+i}).html("<img src="+json.mediaURL[i]+">"))
 			}
 			if (json.mediaCredit[i]!=null){
-				$("#timeline-item-image-"+i).append($("<p class='media-credit'>").text(json.mediaCredit[i]))
-			}			
-		});
-}; //End load JSON into divs
-function getCoords(){	
-	//Find the coordinates for each date;
-	// console.log(dates)
-	$.each(dates,function(i,val){
-		dateCoords[i]=coord(Math.min.apply(Math,dates), Math.max.apply(Math,dates), val);	
-	});
-};
-function drawTimeline(){
-	//Draw the timeline & labels
-	$.each(dateCoords, function(i,val){
-		$("#timeline-events").append(
-			$("<li>").attr({
-				"class":"timeline-event-dot",
-				"id":"timeline-event-dot-" + i,											
-			})			
-			.css({"position":"absolute", "left":(val*100)+"%"})
-			// .css({"position":"absolute", "left":(val*$("#line").width()+"px")})			
-			.click(function(){//scroll to appropriate part of the page when click
-				$('html, body').animate({
-					scrollTop: (Math.floor($("#timeline-item-"+i).offset().top))
-				}, 1000);
-				$("#timeline-item-label-"+i).addClass("timeline-event-dot-selected");
-			})
-			.mouseover(function(){
-				$(this).addClass("timeline-event-dot-active");		
-				//Hide all other labels;
-				$(".timeline-label").each(function(i){					
-					if (!($(this).attr('id')=="first-timeline-label" || $(this).attr('id')=="last-timeline-label"|| $(this).attr('id')=="timeline-labels")){
-						$(this).css("visibility","hidden");
+				$("#newsie-timeline-item-image-"+i).append($("<p class='newsie-media-credit'>").text(json.mediaCredit[i]))
+			}							
+		});//end .each(json.date)
+	};// end populateDivs()
+
+	function drawTimeline(){
+		//Draw the timeline on the bottom of the screen & labels
+		$.each(dateCoords, function(i,val){
+			//For every point
+			$("#timeline-events").append(
+				//add a new dot
+				$("<li>").attr({
+					"class":"newsie-timeline-event-dot",
+					"id":"newsie-timeline-event-dot-" + i,											
+				})			
+				.css({"position":"absolute", "left":(val*100)+"%"})// in its proper position	
+				.click(function(){
+					//Attach click functionality to scroll -- scroll to the proper place.
+					calculateScrollVals(); 
+					$('html, body').animate({scrollTop: scrollVals[i]}, 500);
+					$("#newsie-timeline-item-label-"+i).addClass("newsie-timeline-event-dot-selected");
+				})
+				.mouseover(function(){
+					//on mousover, change class and show the label of the one we are moused over. 
+					$(this).addClass("newsie-timeline-event-dot-active");		
+					//Hide all other labels, except the first and last
+					$(".newsie-timeline-label").each(function(i){					
+						if (!($(this).attr('id')=="first-newsie-timeline-label" || $(this).attr('id')=="last-newsie-timeline-label"|| $(this).attr('id')=="newsie-timeline-labels")){
+							$(this).css("visibility","hidden");
+						}
+					});	
+					//Show the mouseover label					
+					$("#newsie-timeline-label-"+i).css("visibility","visible");
+				})
+				.mouseleave(function(){
+					//deactivate and hide label
+					$(this).removeClass("newsie-timeline-event-dot-active");
+					if (!$("#newsie-timeline-event-dot-"+i).hasClass("newsie-timeline-event-dot-selected")){
+						$("#newsie-timeline-label-"+i).css("visibility","hidden");
 					}
-				});	
-				
-				//Show the mouseover label	
-				
-				$("#timeline-label-"+i).css("visibility","visible");
-			})
-			.mouseleave(function(){
-				//deactivate and hide label
-				$(this).removeClass("timeline-event-dot-active");
-				if (!$("#timeline-event-dot-"+i).hasClass("timeline-event-dot-selected")){
-					$("#timeline-label-"+i).css("visibility","hidden");
+					//show selected label
+					$(".newsie-timeline-event-dot").each(function(i){
+						if ($("#newsie-timeline-event-dot-"+i).hasClass("newsie-timeline-event-dot-selected")){
+							$("#newsie-timeline-label-"+i).css("visibility","visible");
+						}
+					})				
+				})
+				);
+
+			//Previous and next functionality
+			$("#newsie-back-button").unbind('click').click(function(){			
+				if (curPos>0){				
+					$('html,body').animate({
+						scrollTop: scrollVals[curPos-1]
+					}, 250)
 				}
+			});
+			$("#newsie-forward-button").unbind('click').click(function(){			
+				if (curPos<$(".newsie-timeline-event-dot").length-1){
+					$('html,body').animate({
+						scrollTop: scrollVals[curPos+1]
+					}, 250)
+				}
+			});
 
-				//show selected label
-				$(".timeline-event-dot").each(function(i){
-					if ($("#timeline-event-dot-"+i).hasClass("timeline-event-dot-selected")){
-						$("#timeline-label-"+i).css("visibility","visible");
-					}
-				})				
-			})
-			);
-
-		//Attach previous and next functionality
-		$("#back-button").unbind('click').click(function(){
-			
-			if (curPos>0){
-				$('html,body').animate({
-					scrollTop: (Math.floor($("#timeline-item-"+(curPos - 1)).offset().top))
-				}, 1000)
-			}
-		});
-		$("#forward-button").unbind('click').click(function(){			
-			if (curPos<$(".timeline-event-dot").length-1){
-				$('html,body').animate({
-					scrollTop: (Math.floor($("#timeline-item-"+(curPos + 1)).offset().top))
-				}, 1000)
-			}
-			
-		});
-
-		//draw all timeline labels, set as hidden. 
-		$("#timeline-labels").append(
-			$("<li>").attr({
-				"class":"timeline-label",
-				"id":"timeline-label-" +i
-			})
+			//draw all timeline labels, set as hidden. 
+			$("#newsie-timeline-labels").append(
+				$("<li>").attr({
+					"class":"newsie-timeline-label",
+					"id":"newsie-timeline-label-" +i
+				})
 				.text(month[dates[i].getMonth()]+ " " + dates[i].getDate() + ", " + dates[i].getFullYear() + " " + getTime(dates[i]))//Display the date on mouseover								
 				.css({"visibility":"hidden","position":"absolute", "left":dateCoords[i]*100 + "%"})
-				)
-	// console.log($("#timeline-event-dot-"+i).offsetParent().width())
-});
-};//End Draw timeline;
+			)
+		});//end .each(dateCoords)
+	};//End Draw timeline;
 
 
+	function currentView(){
+		//Sets the currently viewed item as active
+		//if scroll is below a certain item, make that one active
+		calculateScrollVals();
+		var barPos = Math.floor($(document).scrollTop());	
+		$.each(scrollVals,function(i,val){
+			if ((i+1)<(scrollVals.length)){
+				if ((barPos>=(scrollVals[i]-5))&&(barPos<(scrollVals[i+1]-5))){ //5 is a safety value for when it scrolls
+					// console.log("HERE")
+					curPos=i;			
+					$("#newsie-timeline-event-dot-"+i).addClass("newsie-timeline-event-dot-selected");
+					$("#newsie-timeline-event-dot-"+i).css("z-index","10");
+					$("#newsie-timeline-label-"+i).css("visibility","visible");
+				}
+				else
+				{
+					$("#newsie-timeline-event-dot-"+i).removeClass("newsie-timeline-event-dot-selected");
+					$("#newsie-timeline-event-dot-"+i).css("z-index","1");
+					$("#newsie-timeline-label-"+i).css("visibility","hidden");
+				}
+			}
+			//last one
+			else{
+				if (barPos>=(scrollVals[i]-5)){
+					curPos=i;
+					$("#newsie-timeline-event-dot-"+i).addClass("newsie-timeline-event-dot-selected");
+					$("#newsie-timeline-event-dot-"+i).css("z-index","10");
+					$("#newsie-timeline-label-"+i).css("visibility","visible");	
+				}
+				else
+				{
+					$("#newsie-timeline-event-dot-"+i).removeClass("newsie-timeline-event-dot-selected");	
+					$("#newsie-timeline-event-dot-"+i).css("z-index","1");
+					$("#newsie-timeline-label-"+i).css("visibility","hidden");
+				}
+			} 
+		});
 
-function currentView(){
-	//Sets the currently viewed item as active
+		//show label.  
+	}// end currentView();
+
+	function resizeTimeline(){
+		//resizes the timline when the window resizes
+		$("#timeline-events").css("width",($("#newsie-line").width()*0.8));	
+	}
+
+	function drawFirstLastLabels(){
+	//paints the label for the first and last dot	
+		var first = 0;		
+		var last = (json.date.length)-1;
+		$("#first-newsie-timeline-label").text(month[dates[first].getMonth()]+ " " + dates[first].getDate() + ", " + dates[first].getFullYear())//Display the date on mouseover
+		.css({"position":"absolute", "left":100*dateCoords[first] + "%"});
+		$("#last-newsie-timeline-label").text(month[dates[last].getMonth()]+ " " + dates[last].getDate() + ", " + dates[last].getFullYear())//Display the date on mouseover
+		.css({"position":"absolute", "left":100*dateCoords[last] + "%"})
+	}
+
+	function createDOMFramework(){
+		$("#newsie-timeline-container")
+		.append($("<div>").attr({"id":"newsie-content"})
+			.append($("<div>").attr({"id":"newsie-line"})
+				.append($("<div>").attr({"id":"line-container"})
+					.append($("<div>").attr({"id":"newsie-line-bg"}))//line-bg
+					.append($("<ul>").attr({"class":"newsie-timeline-label", "id":"newsie-timeline-labels"})
+						.append($("<li>").attr({"class":"newsie-timeline-label", "id":"first-newsie-timeline-label"}))
+						.append($("<li>").attr({"class":"newsie-timeline-label", "id":"last-newsie-timeline-label"}))
+					)//ul newsie-timeline-labels
+					.append($("<ul>").attr({"class":"timeline","id":"timeline-events"}))
+					.append($("<div>").attr({"id":"newsie-button-container"})
+						.append($("<div>").attr({"class":"button", "id":"newsie-back-button"}).html("<h4>Previous</h4>"))
+						.append($("<div>").attr({"class":"button", "id":"newsie-forward-button"}).html("<h4>Next</h4>"))
+					)//#button container
+				)//#line-container
+			)//#line
+		)//#content
+	}
+
+
+$(function(){ //JQuery - when window is ready. 
+//Go for it!
 	
-	$(".timeline-item").each(function(i){
-		scrollVals[i] = Math.floor($("#timeline-item-"+i).offset().top);
-	});
-	// console.log(scrollVals);
-	//if scroll is below a certain item, make that one active
-	var barPos = Math.floor($(document).scrollTop());	
-	$.each(scrollVals,function(i,val){
-		if ((i+1)<(scrollVals.length)){
-			if ((barPos>=(scrollVals[i]-5))&&(barPos<(scrollVals[i+1]-5))){ //5 is a safety value for when it scrolls
-				// console.log("HERE")
-				curPos=i;			
-				$("#timeline-event-dot-"+i).addClass("timeline-event-dot-selected");
-				$("#timeline-event-dot-"+i).css("z-index","10");
-				$("#timeline-label-"+i).css("visibility","visible");
-			}
-			else
-			{
-				$("#timeline-event-dot-"+i).removeClass("timeline-event-dot-selected");
-				$("#timeline-event-dot-"+i).css("z-index","1");
-				$("#timeline-label-"+i).css("visibility","hidden");
-			}
-		}
-		//last one
-		else{
-			if (barPos>=(scrollVals[i]-5)){
-				curPos=i;
-				$("#timeline-event-dot-"+i).addClass("timeline-event-dot-selected");
-				$("#timeline-event-dot-"+i).css("z-index","10");
-				$("#timeline-label-"+i).css("visibility","visible");	
-			}
-			else
-			{
-				$("#timeline-event-dot-"+i).removeClass("timeline-event-dot-selected");	
-				$("#timeline-event-dot-"+i).css("z-index","1");
-				$("#timeline-label-"+i).css("visibility","hidden");
-			}
-		} 
+
+//Load the dataset. The key comes from gsKey property of newsie-timeline-container div
+	var ds = new Miso.Dataset({ //Use MISO library to get 
+		importer : Miso.Dataset.Importers.GoogleSpreadsheet,
+		parser : Miso.Dataset.Parsers.GoogleSpreadsheet,
+		key : $("#newsie-timeline-container").attr("gsKey"),
+		worksheet : "1"
 	});
 
-	//show label.  
+
+	getDataset = function(){
+		ds.fetch({ 
+			success : function() {
+				json.date=(ds.column("Date").data);			
+				$.each(json.date,function(i,val){
+					json.date[i] =  new Date(val);
+					if (ds.column("Time").data[i]!=null){
+						var ti = parseTime(ds.column("Time").data[i])
+						json.date[i].setHours(ti[0]);
+						json.date[i].setMinutes(ti[1]);
+					}
+				})
+				json.title=ds.column("Title").data;
+				json.content=ds.column("Text").data;
+				json.mediaURL=ds.column("MediaURL").data;
+				json.mediaCredit=ds.column("Media Credit").data;
+
+				//Once data is received, call the other functions.
+				dfd.resolve();
+			},
+			error : function() {
+				console.log("Are you sure you are connected to the internet?");
+			}
+		});
+	}
 
 
-}// end currentView();
+	getDataset(); //assume sorted	
+	dfd.done(createDOMFramework,
+		function(){$(window).scroll(function(){currentView();})},
+		function(){$(window).resize(function(){resizeTimeline();})},
+		populateDivs,
+		getCoords,
+		drawTimeline,
+		drawFirstLastLabels
+		);
 
-function resizeTimeline(){
-	$("#timeline-events").css("width",($("#line").width()*0.8))
-
-	;
-	
-}
-
-function drawFirstLastLabels(){
-	//get the first label
-	var first = 0;
-	//get the last label
-	var last = (json.date.length)-1;
-
-	// $(".timeline-event-dot").each(function(i){
-	// 	// console.log($(this).position().left);
-	// 	// console.log($("#line").width())
-	// 	if($(this).position().left==0){//first
-	// 		first = i;
-
-	// 	}
-	// 	else if($(this).position().left>=$("#line").width()){//last
-	// 		last = i;
-	// 		console.log("last " + last);
-	// 	}
-	// });
-	// var output =$("#timeline-event-dot-"+last).position().left/$("#timeline-event-dot-"+last).offsetParent().width();
-	// console.log(output);
-	//Draw first 
-	$("#first-timeline-label").text(month[dates[first].getMonth()]+ " " + dates[first].getDate() + ", " + dates[first].getFullYear())//Display the date on mouseover
-	.css({"position":"absolute", "left":100*dateCoords[first] + "%"});
-	$("#last-timeline-label").text(month[dates[last].getMonth()]+ " " + dates[last].getDate() + ", " + dates[last].getFullYear())//Display the date on mouseover
-	.css({"position":"absolute", "left":100*dateCoords[last] + "%"})
-
-}
-
-
-getDataset(); //assume sorted
-dfd.done(function(){$(window).scroll(function(){currentView();})},
-	function(){$(window).resize(function(){resizeTimeline();})},
-	populateDivs,
-	getCoords,
-	drawTimeline,
-	drawFirstLastLabels);
-
-
-// sortInput(); //sort the input by date order
-	// populateDivs(); //write that to the page
-// getCoords(); //prepare the timeline
-// drawTimeline(); //draw it
-// drawFirstLastLabels(); //draw the labels
-//when stuff happens on the page, change stuff. 
-// $(window).resize(function(){resizeTimeline();});
-// $(window).scroll(function(){currentView();});
+	// console.log($("#newsie-timeline-container").attr("gsKey"))
 });
