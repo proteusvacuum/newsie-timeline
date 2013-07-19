@@ -35,5 +35,7 @@ html[xmlns] .clearfix {
 	width:100%;
 	z-index:10; 
 }
-
+#some-other-div{
+	height:10000px;
+}
 
