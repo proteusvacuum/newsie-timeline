@@ -6,8 +6,8 @@ A javascript/jquery timeline with google docs.
 An example can be found [here](http://timeline.faridrener.com)
 A sample dataset can be found [here](https://docs.google.com/spreadsheet/ccc?key=0Ag-BlnbZq4DXdG9YM1hnY3lsNXlZYW9UTnF4Y1dRdEE#gid=0)
 
-1. Prepare your data:
-
+Prepare your data:
+-----------------
 Create your google spreadsheet with column names:
 - Date 
 - Time
