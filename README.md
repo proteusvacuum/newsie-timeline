@@ -34,17 +34,20 @@ newsie-timeline has a few dependencies:
 - [Miso](http://misoproject.com/)
 - [ImagesLoaded](https://github.com/desandro/imagesloaded)
 - [jQueryStickem](https://github.com/davist11/jQuery-Stickem)
+
 	They are included in the src folder of this repo. 
 	Add them to your page with the following in your header, or however else you prefer to add scripts.
-	`<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-		<script src="src/jquery.stickem.min.js"></script>
-		<script src="src/miso.ds.deps.ie.min.0.4.0.js"></script>
-		<script src="src/imagesloaded.pkgd.min.js"></script>`
+	`<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>`
+	`<script src="src/jquery.stickem.min.js"></script>`
+	`<script src="src/miso.ds.deps.ie.min.0.4.0.js"></script>`
+	`<script src="src/imagesloaded.pkgd.min.js"></script>`
 
 Then add newsie-timeline.js and its stylesheet - newsie-timeline.css
 	`<script src="src/newsie-timeline.min.js"></script>`
-	`<link rel="stylesheet" href="css/newsie-timeline.css">`
+	`<link rel="stylesheet" href="css/newsie-timeline.css">` 
+
 In the place you want the timeline to be add the following div, replacing GOOGLE-DRIVE-SPREADSHEET-KEY with the key you copied in step 1. 
+
 `<div id="newsie-timeline-container" gsKey="GOOGLE-DRIVE-SPREADSHEET-KEY"></div>`
 
 Refresh your page! That should be it! You can style the timeline as you wish with the css. 
