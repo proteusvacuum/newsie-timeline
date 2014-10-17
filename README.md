@@ -37,14 +37,20 @@ newsie-timeline has a few dependencies:
 
 	They are included in the src folder of this repo. 
 	Add them to your page with the following in your header, or however else you prefer to add scripts.
-	`<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>`
-	`<script src="src/jquery.stickem.min.js"></script>`
-	`<script src="src/miso.ds.deps.ie.min.0.4.0.js"></script>`
-	`<script src="src/imagesloaded.pkgd.min.js"></script>`
+	
+	```html
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+	<script src="src/jquery.stickem.min.js"></script>
+	<script src="src/miso.ds.deps.ie.min.0.4.0.js"></script>
+	<script src="src/imagesloaded.pkgd.min.js"></script>
+	```
 
 Then add newsie-timeline.js and its stylesheet - newsie-timeline.css
-	`<script src="src/newsie-timeline.min.js"></script>`
-	`<link rel="stylesheet" href="css/newsie-timeline.css">` 
+
+	```html
+	<script src="src/newsie-timeline.min.js"></script>
+	<link rel="stylesheet" href="css/newsie-timeline.css">
+	```
 
 In the place you want the timeline to be add the following div, replacing GOOGLE-DRIVE-SPREADSHEET-KEY with the key you copied in step 1. 
 
